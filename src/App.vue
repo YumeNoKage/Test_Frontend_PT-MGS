@@ -1,30 +1,72 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <Notification/>
+  <div v-if="isLoginIn">
+    <Navigation/>
+    <div class="px-4 my-4">
+      <div class="row">
+        <div class="d-none d-lg-block col-lg-2">
+          <Profile/>
+        </div>
+        <div class="col-sm-12 col-md-12 col-lg-10">
+          <router-view :key="$route.path"/>
+        </div>
+      </div>
+    </div>
   </div>
-  <router-view/>
+  <div v-else>
+    <router-view/>
+  </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import Navigation from '@/components/Navigation/Navigation.vue'
+import Profile from '@/components/Profile/Profile.vue'
+import { mapGetters, mapMutations } from 'vuex';
 
-#nav {
-  padding: 30px;
-}
+export default {
+  name: 'App',
+  components: {
+    Navigation,
+    Profile
+  },
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+  computed:{
+    ...mapGetters({
+      isLoginIn: 'isLoginIn',
+      notification: 'notification'
+    })
+  },
 
-#nav a.router-link-exact-active {
-  color: #42b983;
+  watch:{
+    '$route.path'(newValue){
+      const token = localStorage.getItem('token')
+
+      if ((newValue === '/login' || newValue === '/registration') && token) {
+        this.$router.push('/barang')
+      }
+    }
+  },
+
+  methods:{
+    ...mapMutations({
+      setIsLogin: 'setIsLogin'
+    })
+  },
+
+  mounted() {
+    const token = localStorage.getItem('token')
+
+    if(token && !this.isLoginIn){
+      this.setIsLogin(token || false)
+  //     this.$router.push('/barang')
+  //   } else {
+    } else if (!token){
+      this.$router.push('/')
+    }
+    
+  //   if ((this.$route.path === '/login' || this.$route.path === '/registration') && token) {
+  //     this.$router.push('/barang')
+  //   }
+  },
 }
-</style>
+</script>
