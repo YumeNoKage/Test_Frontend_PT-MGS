@@ -7,43 +7,49 @@
     <div class="card-body">
       <div class="d-flex justify-content-between mb-3">
         <h5 class="mb-0">Barang</h5>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateBarang" @click="addBarang = true, resetFormEdit()">Tambah Barang</button>
+        <div class="d-flex">
+          <button type="button" class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#updateBarang" @click="addBarang = true, resetFormEdit()">Tambah Barang</button>
+          <button v-if="!isLoading && data.length > 0" type="button" class="btn btn-secondary" @click="callGeneratePdf()">Unduh PDF</button>
+        </div>
       </div>
     </div>
 
     <div class="card-body overflow-auto">
-      <table v-if="!isLoading && data.length > 0" class="table border-1 border rounded">
-        <thead>
-          <tr>
-            <th scope="col">No</th>
-            <th scope="col">Nama Barang</th>
-            <th scope="col">Stock</th>
-            <th scope="col">Harga</th>
-            <th scope="col">Nama Supplier</th>
-            <th scope="col">Alamat Supplier</th>
-            <th scope="col">No Telp Supplier</th>
-            <th scope="col" class="text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in data" :key="item.id">
-            <th scope="row">{{ (pagination.currentPage - 1) * pagination.limit + index + 1 }}</th>
-            <td>{{ item.namaBarang }}</td>
-            <td>{{ item.stok }}</td>
-            <td>{{ item.harga }}</td>
-            <td>{{ item.supplier.namaSupplier }}</td>
-            <td>{{ item.supplier.alamat }}</td>
-            <td>{{ item.supplier.noTelp }}</td>
-            <td>
-              <div class="d-flex justify-content-center">
-                <button type="button" class="btn btn-danger" @click="deleteSomeBarang(item.id)">Hapus</button>
-                <button type="button" class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#updateBarang" @click="onEdit = {...item}, addBarang = false">Update</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
+      <div
+        v-if="!isLoading && data.length > 0" 
+      >
+        <table class="table border-1 border rounded">
+          <thead>
+            <tr>
+              <th scope="col">No</th>
+              <th scope="col">Nama Barang</th>
+              <th scope="col">Stock</th>
+              <th scope="col">Harga</th>
+              <th scope="col">Nama Supplier</th>
+              <th scope="col">Alamat Supplier</th>
+              <th scope="col">No Telp Supplier</th>
+              <th scope="col" class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in data" :key="item.id">
+              <th scope="row">{{ (pagination.currentPage - 1) * pagination.limit + index + 1 }}</th>
+              <td>{{ item.namaBarang }}</td>
+              <td>{{ item.stok }}</td>
+              <td>{{ item.harga }}</td>
+              <td>{{ item.supplier.namaSupplier }}</td>
+              <td>{{ item.supplier.alamat }}</td>
+              <td>{{ item.supplier.noTelp }}</td>
+              <td>
+                <div class="d-flex justify-content-center">
+                  <button type="button" class="btn btn-danger" @click="deleteSomeBarang(item.id)">Hapus</button>
+                  <button type="button" class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#updateBarang" @click="onEdit = {...item}, addBarang = false">Update</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div v-else-if="isLoading && data.length == 0" class="d-flex justify-content-center">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
@@ -113,6 +119,7 @@
 
 <script>
 import { mapActions, mapMutations } from 'vuex';
+
 export default {
   name: 'Barang',
 
@@ -155,6 +162,32 @@ export default {
     ...mapMutations({
       setNotification: 'setNotification',
     }),
+
+    callGeneratePdf(){
+      const header = [
+        {title: "No", dataKey: "index"},
+        {title: "Nama Barang", dataKey: "namaBarang"}, 
+        {title: "Stock", dataKey: "stok"},
+        {title: "Harga", dataKey: "harga"},
+        {title: "Nama Supplier", dataKey: "namaSupplier"},
+        {title: "Alamat Supplier", dataKey: "alamat"},
+        {title: "No Telp Supplier", dataKey: "noTelp"},
+      ]
+
+      const data = this.data.map((item, i) => {
+        return {
+          index: (this.pagination.currentPage - 1) * this.pagination.limit + i + 1,
+          namaBarang: item.namaBarang,
+          stok: item.stok,
+          harga: item.harga,
+          namaSupplier: item.supplier.namaSupplier,
+          alamat: item.supplier.alamat,
+          noTelp: item.supplier.noTelp,
+        }
+      })
+
+      this.generatePdf(header, data, 'Barang')
+    },
 
     resetFormEdit(){
       this.onEdit = {

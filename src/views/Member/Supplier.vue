@@ -6,7 +6,10 @@
     <div class="card-body">
       <div class="d-flex justify-content-between">
         <h5 class="mb-0">Supplier</h5>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateSupplier" @click="addSupplier = true, resetFormEdit()">Tambah Supplier</button>
+        <div class="d-flex">
+          <button type="button" class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#updateSupplier" @click="addSupplier = true, resetFormEdit()">Tambah Supplier</button>
+          <button v-if="!isLoading && data.length > 0" type="button" class="btn btn-secondary" @click="callGeneratePdf()">Unduh PDF</button>
+        </div>
       </div>
     </div>
     <div class="card-body overflow-auto">
@@ -133,6 +136,26 @@ export default {
     ...mapMutations({
       setNotification: 'setNotification',
     }),
+
+    callGeneratePdf(){
+      const header = [
+        {title: "No", dataKey: "index"},
+        {title: "Nama Supplier", dataKey: "namaSupplier"},
+        {title: "Alamat", dataKey: "alamat"},
+        {title: "No Telp", dataKey: "noTelp"},
+      ]
+
+      const data = this.data.map((item, i) => {
+        return {
+          index: (this.pagination.currentPage - 1) * this.pagination.limit + i + 1,
+          namaSupplier: item.namaSupplier,
+          alamat: item.alamat,
+          noTelp: item.noTelp,
+        }
+      })
+
+      this.generatePdf(header, data, 'Supplier')
+    },
 
     resetFormEdit(){
       this.onEdit = {

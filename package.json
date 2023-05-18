@@ -11,6 +11,8 @@
     "@popperjs/core": "^2.11.7",
     "axios": "^1.4.0",
     "bootstrap": "^5.2.3",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.28",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
